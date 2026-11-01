@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WorkOS Auth Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; background: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    h2 { color: #333; }
+    input { display: block; width: 100%; margin: 10px 0; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    button { background: #6366f1; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 16px; }
+    button:hover { background: #4f46e5; }
+    .hidden { display: none; }
+    #message { margin-top: 15px; font-weight: bold; color: #059669; }
+  </style>
+</head>
+<body>
+
+  <!-- Sign-Up Form -->
+  <div id="signup-container">
+    <h2>Create Account</h2>
+    <input type="text" id="firstName" placeholder="First Name" required />
+    <input type="text" id="lastName" placeholder="Last Name" required />
+    <input type="email" id="email" placeholder="Email Address" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button onclick="handleSignup()">Sign Up</button>
+  </div>
+
+  <!-- Verification Form (Hidden until sign-up succeeds) -->
+  <div id="verify-container" class="hidden">
+    <h2>Verify Your Email</h2>
+    <p>We've sent a 6-digit code to your email. Enter it below:</p>
+    <input type="text" id="code" placeholder="Enter 6-digit code" maxlength="6" required />
+    <button onclick="handleVerify()">Verify Code</button>
+  </div>
+
+  <div id="message"></div>
+
+  <script>
+    let pendingToken = null;
+
+    async function handleSignup() {
+      const firstName = document.getElementById('firstName').value;
+      const lastName = document.getElementById('lastName').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, email, password })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('signup-container').classList.add('hidden');
+        document.getElementById('verify-container').classList.remove('hidden');
+        document.getElementById('message').innerText = 'User created! Check your email for the code.';
+      } else {
+        document.getElementById('message').style.color = '#dc2626';
+        document.getElementById('message').innerText = 'Error: ' + data.error;
+      }
+    }
+
+    async function handleVerify() {
+      const code = document.getElementById('code').value;
+
+      const res = await fetch('/api/verify-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, pendingAuthenticationToken: pendingToken })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('message').style.color = '#059669';
+        document.getElementById('message').innerText = 'Success! Email verified and user logged in.';
+        console.log('User Data:', data.user);
+      } else {
+        document.getElementById('message').style.color = '#dc2626';
+        document.getElementById('message').innerText = 'Verification Error: ' + data.error;
+      }
+    }
+  </script>
+</body>
+</html>
