@@ -29,7 +29,7 @@ app.post('/api/signup', async (req, res) => {
       password,
       firstName,
       lastName,
-      emailVerified: true, // Instant verification for seamless access
+      emailVerified: true, // Instant verification
     });
 
     return res.status(200).json({
@@ -80,24 +80,46 @@ app.post('/api/signin', async (req, res) => {
 });
 
 // ----------------------------------------------------------------
-// 3. GET MUSIC ENDPOINT (Fetches tracks from Supabase)
+// 3. GET MUSIC ENDPOINT (Reads directly from Supabase Storage 'Songs' bucket)
 // ----------------------------------------------------------------
 app.get('/api/music', async (req, res) => {
   try {
-    const { data: tracks, error } = await supabase
-      .from('tracks') // Assumes your Supabase table is named 'tracks'
-      .select('*')
-      .order('created_at', { ascending: false });
+    // List all files inside the 'Songs' bucket
+    const { data: files, error } = await supabase
+      .storage
+      .from('Songs')
+      .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
 
     if (error) throw error;
+
+    // Map each file to its title and public audio URL
+    const tracks = files
+      .filter(file => file.name !== '.emptyFolderPlaceholder') // Exclude placeholder files
+      .map(file => {
+        const { data: publicUrlData } = supabase
+          .storage
+          .from('Songs')
+          .getPublicUrl(file.name);
+
+        // Format clean title from filename (e.g. "my-song.mp3" -> "my song")
+        const cleanTitle = file.name
+          .replace(/\.[^/.]+$/, "") // Remove file extension
+          .replace(/[-_]/g, " ");   // Replace hyphens/underscores with spaces
+
+        return {
+          title: cleanTitle,
+          fileName: file.name,
+          audio_url: publicUrlData.publicUrl
+        };
+      });
 
     return res.status(200).json({
       success: true,
       tracks,
     });
   } catch (error) {
-    console.error('Error fetching music:', error);
-    return res.status(500).json({ success: false, error: 'Failed to load music tracks.' });
+    console.error('Error fetching music from storage:', error);
+    return res.status(500).json({ success: false, error: 'Failed to load music files from storage.' });
   }
 });
 
