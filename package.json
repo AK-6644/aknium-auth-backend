@@ -6,6 +6,7 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@workos-inc/node": "^4.0.3",
     "cors": "^2.8.5",
     "express": "^4.19.2"
   }
