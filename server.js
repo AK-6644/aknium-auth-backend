@@ -23,7 +23,7 @@ app.post('/api/signup', async (req, res) => {
       password,
       firstName,
       lastName,
-      emailVerified: false,
+      emailVerified: true,
     });
 
     return res.status(200).json({
