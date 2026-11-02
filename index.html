@@ -19,9 +19,17 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: var(--bg-color); color: var(--text-color); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
     
-    .auth-container { background-color: var(--card-bg); width: 100%; max-width: 450px; padding: 32px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .auth-container { background-color: var(--card-bg); width: 100%; max-width: 450px; padding: 32px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; }
+    
+    .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .dashboard-header h2 { margin-bottom: 0; font-size: 1.4rem; }
+
+    .signout-btn { background-color: rgba(239, 68, 68, 0.15); color: var(--error-color); border: 1px solid var(--error-color); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .signout-btn:hover { background-color: var(--error-color); color: white; }
+
     h2 { margin-bottom: 4px; font-size: 1.5rem; text-align: center; }
-    p.subtitle { color: var(--muted-text); font-size: 0.875rem; text-align: center; margin-bottom: 20px; }
+    p.subtitle { color: var(--muted-text); font-size: 0.875rem; text-align: left; margin-bottom: 20px; }
+    #authHeader p.subtitle { text-align: center; }
     
     /* Navigation Tabs */
     .tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #334155; }
@@ -114,7 +122,10 @@
 
     <!-- MUSIC DASHBOARD VIEW (Shown after login) -->
     <div id="musicDashboard" class="hidden">
-      <h2>Aknium Library 🎶</h2>
+      <div class="dashboard-header">
+        <h2>Aknium Library 🎶</h2>
+        <button type="button" class="signout-btn" onclick="signOut()">Sign Out</button>
+      </div>
       <p class="subtitle" id="welcomeUser">Welcome back!</p>
       <div id="trackList" class="track-list">
         <p style="text-align: center; color: var(--muted-text);">Loading tracks from storage...</p>
@@ -170,6 +181,14 @@
         inputField.type = 'password';
         btn.textContent = '👁️';
       }
+    }
+
+    // Sign Out Function
+    function signOut() {
+      localStorage.removeItem('aknium_access_token');
+      musicDashboard.classList.add('hidden');
+      authHeader.classList.remove('hidden');
+      switchTab('signin');
     }
 
     async function loadMusicTracks() {
@@ -236,9 +255,12 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        const data = x = await response.json();
+        const data = await response.json();
 
         if (data.success) {
+          if (data.accessToken) {
+            localStorage.setItem('aknium_access_token', data.accessToken);
+          }
           showDashboard(data.user.firstName);
         } else {
           showAlert(data.error || 'Signup failed.');
