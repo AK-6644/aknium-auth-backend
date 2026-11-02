@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aknium Music - Authentication</title>
+  <title>Aknium Music</title>
   <style>
     :root {
       --bg-color: #0f172a;
@@ -19,93 +19,108 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: var(--bg-color); color: var(--text-color); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
     
-    .auth-container { background-color: var(--card-bg); width: 100%; max-width: 400px; padding: 32px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-    h2 { margin-bottom: 8px; font-size: 1.5rem; text-align: center; }
-    p.subtitle { color: var(--muted-text); font-size: 0.875rem; text-align: center; margin-bottom: 24px; }
+    .auth-container { background-color: var(--card-bg); width: 100%; max-width: 450px; padding: 32px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    h2 { margin-bottom: 4px; font-size: 1.5rem; text-align: center; }
+    p.subtitle { color: var(--muted-text); font-size: 0.875rem; text-align: center; margin-bottom: 20px; }
     
+    /* Navigation Tabs */
+    .tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #334155; }
+    .tab-btn { flex: 1; padding: 10px; background: none; border: none; color: var(--muted-text); font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .tab-btn.active { color: var(--accent-color); border-bottom-color: var(--accent-color); }
+
     .form-group { margin-bottom: 16px; }
     label { display: block; font-size: 0.85rem; margin-bottom: 6px; color: var(--muted-text); }
     input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: #fff; font-size: 1rem; outline: none; transition: border-color 0.2s; }
     input:focus { border-color: var(--accent-color); }
 
-    .code-input { text-align: center; letter-spacing: 8px; font-size: 1.5rem; font-weight: bold; }
-
-    button { width: 100%; padding: 12px; border: none; border-radius: 6px; background-color: var(--accent-color); color: white; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
-    button:hover { background-color: var(--accent-hover); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .submit-btn { width: 100%; padding: 12px; border: none; border-radius: 6px; background-color: var(--accent-color); color: white; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
+    .submit-btn:hover { background-color: var(--accent-hover); }
+    .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .alert { font-size: 0.875rem; padding: 10px; border-radius: 6px; margin-bottom: 16px; text-align: center; display: none; }
     .alert-error { background-color: rgba(239, 68, 68, 0.15); color: var(--error-color); border: 1px solid var(--error-color); }
-    .alert-success { background-color: rgba(34, 197, 94, 0.15); color: var(--success-color); border: 1px solid var(--success-color); }
     
+    /* Music Library Dashboard */
+    .track-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
+    .track-item { background: #0f172a; padding: 12px; border-radius: 6px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #334155; }
+    .track-title { font-weight: 600; font-size: 0.95rem; }
+    audio { width: 100%; height: 35px; }
+
     .hidden { display: none; }
   </style>
 </head>
 <body>
 
   <div class="auth-container">
+    <div id="authHeader">
+      <h2 id="authTitle">Aknium Music</h2>
+      <p class="subtitle" id="authSubtitle">Sign up or sign in to listen</p>
+
+      <!-- Navigation Tabs -->
+      <div class="tabs">
+        <button type="button" class="tab-btn active" id="tabSignupBtn" onclick="switchTab('signup')">Sign Up</button>
+        <button type="button" class="tab-btn" id="tabSigninBtn" onclick="switchTab('signin')">Sign In</button>
+      </div>
+    </div>
+
     <div id="alertBox" class="alert"></div>
 
-    <!-- STEP 1: SIGNUP FORM -->
+    <!-- SIGN UP FORM -->
     <form id="signupForm">
-      <h2>Create Account</h2>
-      <p class="subtitle">Join Aknium Music to start listening</p>
-
       <div class="form-group">
-        <label for="firstName">First Name</label>
-        <input type="text" id="firstName" placeholder="John" required>
+        <label for="signUpFirstName">First Name</label>
+        <input type="text" id="signUpFirstName" placeholder="John" required>
       </div>
-
       <div class="form-group">
-        <label for="lastName">Last Name</label>
-        <input type="text" id="lastName" placeholder="Doe" required>
+        <label for="signUpLastName">Last Name</label>
+        <input type="text" id="signUpLastName" placeholder="Doe" required>
       </div>
-
       <div class="form-group">
-        <label for="email">Email Address</label>
-        <input type="email" id="email" placeholder="john@example.com" required>
+        <label for="signUpEmail">Email Address</label>
+        <input type="email" id="signUpEmail" placeholder="john@example.com" required>
       </div>
-
       <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" minlength="8" required>
+        <label for="signUpPassword">Password</label>
+        <input type="password" id="signUpPassword" placeholder="••••••••" minlength="8" required>
       </div>
-
-      <button type="submit" id="signupBtn">Sign Up</button>
+      <button type="submit" class="submit-btn" id="signupSubmitBtn">Create Account</button>
     </form>
 
-    <!-- STEP 2: 6-DIGIT VERIFICATION FORM -->
-    <form id="verifyForm" class="hidden">
-      <h2>Enter Verification Code</h2>
-      <p class="subtitle">We sent a 6-digit code to your email address.</p>
-
+    <!-- SIGN IN FORM -->
+    <form id="signinForm" class="hidden">
       <div class="form-group">
-        <label for="code">6-Digit Code</label>
-        <input type="text" id="code" class="code-input" maxlength="6" placeholder="123456" required autocomplete="one-time-code">
+        <label for="signInEmail">Email Address</label>
+        <input type="email" id="signInEmail" placeholder="john@example.com" required>
       </div>
-
-      <button type="submit" id="verifyBtn">Verify Email</button>
+      <div class="form-group">
+        <label for="signInPassword">Password</label>
+        <input type="password" id="signInPassword" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="submit-btn" id="signinSubmitBtn">Sign In</button>
     </form>
 
-    <!-- STEP 3: SUCCESS VIEW -->
-    <div id="successView" class="hidden" style="text-align: center;">
-      <h2>Welcome to Aknium! 🎉</h2>
-      <p class="subtitle">Your email has been verified. You are now logged in.</p>
+    <!-- MUSIC DASHBOARD VIEW (Shown after login) -->
+    <div id="musicDashboard" class="hidden">
+      <h2>Aknium Library 🎶</h2>
+      <p class="subtitle" id="welcomeUser">Welcome back!</p>
+      <div id="trackList" class="track-list">
+        <p style="text-align: center; color: var(--muted-text);">Loading tracks...</p>
+      </div>
     </div>
   </div>
 
   <script>
-    // Automatically sets backend URL depending on environment
     const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
       ? 'http://localhost:3000' 
       : 'https://aknium-auth.onrender.com';
 
-    let pendingToken = '';
-
     const signupForm = document.getElementById('signupForm');
-    const verifyForm = document.getElementById('verifyForm');
-    const successView = document.getElementById('successView');
+    const signinForm = document.getElementById('signinForm');
+    const musicDashboard = document.getElementById('musicDashboard');
+    const authHeader = document.getElementById('authHeader');
     const alertBox = document.getElementById('alertBox');
+    const tabSignupBtn = document.getElementById('tabSignupBtn');
+    const tabSigninBtn = document.getElementById('tabSigninBtn');
 
     function showAlert(message, isError = true) {
       alertBox.textContent = message;
@@ -117,20 +132,77 @@
       alertBox.style.display = 'none';
     }
 
-    // 1. Handle Signup Submit
+    function switchTab(tab) {
+      hideAlert();
+      if (tab === 'signup') {
+        tabSignupBtn.classList.add('active');
+        tabSigninBtn.classList.remove('active');
+        signupForm.classList.remove('hidden');
+        signinForm.classList.add('hidden');
+      } else {
+        tabSigninBtn.classList.add('active');
+        tabSignupBtn.classList.remove('active');
+        signinForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+      }
+    }
+
+    async function loadMusicTracks() {
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/music`, {
+          method: 'GET',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('aknium_access_token')}`
+          }
+        });
+
+        const data = await response.json();
+        const trackListEl = document.getElementById('trackList');
+
+        if (data.success && data.tracks && data.tracks.length > 0) {
+          trackListEl.innerHTML = '';
+          data.tracks.forEach(track => {
+            const trackDiv = document.createElement('div');
+            trackDiv.className = 'track-item';
+            trackDiv.innerHTML = `
+              <div class="track-title">${track.title || 'Untitled Track'}</div>
+              <audio controls src="${track.audio_url}"></audio>
+            `;
+            trackListEl.appendChild(trackDiv);
+          });
+        } else {
+          trackListEl.innerHTML = '<p style="text-align: center; color: var(--muted-text);">No music tracks found.</p>';
+        }
+      } catch (err) {
+        document.getElementById('trackList').innerHTML = '<p style="text-align: center; color: var(--error-color);">Failed to load tracks.</p>';
+      }
+    }
+
+    function showDashboard(userName) {
+      authHeader.classList.add('hidden');
+      signupForm.classList.add('hidden');
+      signinForm.classList.add('hidden');
+      hideAlert();
+      
+      document.getElementById('welcomeUser').textContent = `Welcome, ${userName || 'Music Lover'}!`;
+      musicDashboard.classList.remove('hidden');
+      loadMusicTracks();
+    }
+
+    // 1. Handle Sign Up
     signupForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       hideAlert();
-      
-      const btn = document.getElementById('signupBtn');
+      const btn = document.getElementById('signupSubmitBtn');
       btn.disabled = true;
       btn.textContent = 'Creating account...';
 
       const payload = {
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value,
+        firstName: document.getElementById('signUpFirstName').value,
+        lastName: document.getElementById('signUpLastName').value,
+        email: document.getElementById('signUpEmail').value,
+        password: document.getElementById('signUpPassword').value,
       };
 
       try {
@@ -139,64 +211,55 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
         const data = await response.json();
 
         if (data.success) {
-          pendingToken = data.pendingAuthenticationToken || '';
-          signupForm.classList.add('hidden');
-          verifyForm.classList.remove('hidden');
-          showAlert(data.message, false);
+          showDashboard(data.user.firstName);
         } else {
           showAlert(data.error || 'Signup failed.');
         }
       } catch (err) {
-        showAlert('Unable to connect to the server. Please try again.');
+        showAlert('Unable to connect to server.');
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Sign Up';
+        btn.textContent = 'Create Account';
       }
     });
 
-    // 2. Handle Verification Code Submit
-    verifyForm.addEventListener('submit', async (e) => {
+    // 2. Handle Sign In
+    signinForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       hideAlert();
-
-      const btn = document.getElementById('verifyBtn');
+      const btn = document.getElementById('signinSubmitBtn');
       btn.disabled = true;
-      btn.textContent = 'Verifying...';
+      btn.textContent = 'Signing in...';
 
-      const code = document.getElementById('code').value.trim();
+      const payload = {
+        email: document.getElementById('signInEmail').value,
+        password: document.getElementById('signInPassword').value,
+      };
 
       try {
-        const response = await fetch(`${BACKEND_URL}/api/verify-code`, {
+        const response = await fetch(`${BACKEND_URL}/api/signin`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            code: code,
-            pendingAuthenticationToken: pendingToken
-          })
+          body: JSON.stringify(payload)
         });
-
         const data = await response.json();
 
         if (data.success) {
-          verifyForm.classList.add('hidden');
-          successView.classList.remove('hidden');
-          hideAlert();
-          // Store token in browser storage
           if (data.accessToken) {
             localStorage.setItem('aknium_access_token', data.accessToken);
           }
+          showDashboard(data.user.firstName);
         } else {
-          showAlert(data.error || 'Invalid verification code.');
+          showAlert(data.error || 'Invalid credentials.');
         }
       } catch (err) {
-        showAlert('Failed to connect to verification server.');
+        showAlert('Unable to connect to server.');
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Verify Email';
+        btn.textContent = 'Sign In';
       }
     });
   </script>
