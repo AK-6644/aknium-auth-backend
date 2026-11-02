@@ -1,18 +1,24 @@
 import express from 'express';
 import cors from 'cors';
 import { WorkOS } from '@workos-inc/node';
+import { createClient } from '@supabase/supabase-js';
 
 const app = express();
-app.use(express.json()); // Parses incoming JSON requests from your frontend
-app.use(cors()); // Enables CORS so Google Sites can communicate with this backend
-app.use(express.static('.')); // Serves your static index.html frontend
+app.use(express.json());
+app.use(cors());
+app.use(express.static('.'));
 
-// Initialize WorkOS securely using Render environment variables
+// Initialize WorkOS and Supabase using Render environment variables
 const workos = new WorkOS(process.env.WORKOS_API_KEY);
 const clientId = process.env.WORKOS_CLIENT_ID;
 
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
 // ----------------------------------------------------------------
-// 1. SIGN-UP ENDPOINT: Creates user (WorkOS automatically sends code)
+// 1. SIGN-UP ENDPOINT
 // ----------------------------------------------------------------
 app.post('/api/signup', async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
@@ -23,57 +29,77 @@ app.post('/api/signup', async (req, res) => {
       password,
       firstName,
       lastName,
-      emailVerified: true,
+      emailVerified: true, // Instant verification for seamless access
     });
 
     return res.status(200).json({
       success: true,
-      message: 'User created! Verification code sent to email.',
-      userId: user.id,
+      message: 'Account created successfully!',
+      user,
     });
   } catch (error) {
     console.error('Signup error:', error);
-    
-    // Check if the email already exists
     if (error.message && error.message.toLowerCase().includes('already exists')) {
       return res.status(400).json({ 
         success: false, 
         error: 'An account with this email already exists. Please sign in instead.' 
       });
     }
-
     return res.status(400).json({ success: false, error: error.message });
   }
 });
 
 // ----------------------------------------------------------------
-// 2. VERIFY ENDPOINT: Authenticates the 6-digit code with WorkOS
+// 2. SIGN-IN ENDPOINT
 // ----------------------------------------------------------------
-app.post('/api/verify-code', async (req, res) => {
-  const { code, pendingAuthenticationToken } = req.body;
+app.post('/api/signin', async (req, res) => {
+  const { email, password } = req.body;
 
   try {
-    const { user, accessToken } = await workos.userManagement.authenticateWithCode({
+    const { user, accessToken } = await workos.userManagement.authenticateWithPassword({
       clientId: clientId,
-      code: code,
-      pendingAuthenticationToken: pendingAuthenticationToken,
-      grantType: 'urn:workos:oauth:grant-type:email-verification:code',
+      email: email,
+      password: password,
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
     });
 
     return res.status(200).json({
       success: true,
-      message: 'Email successfully verified!',
+      message: 'Signed in successfully!',
       user,
       accessToken,
     });
   } catch (error) {
-    console.error('Verification error:', error);
-    return res.status(400).json({ success: false, error: error.message });
+    console.error('Signin error:', error);
+    return res.status(400).json({ 
+      success: false, 
+      error: 'Invalid email or password.' 
+    });
   }
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// ----------------------------------------------------------------
+// 3. GET MUSIC ENDPOINT (Fetches tracks from Supabase)
+// ----------------------------------------------------------------
+app.get('/api/music', async (req, res) => {
+  try {
+    const { data: tracks, error } = await supabase
+      .from('tracks') // Assumes your Supabase table is named 'tracks'
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    return res.status(200).json({
+      success: true,
+      tracks,
+    });
+  } catch (error) {
+    console.error('Error fetching music:', error);
+    return res.status(500).json({ success: false, error: 'Failed to load music tracks.' });
+  }
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
