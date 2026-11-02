@@ -50,7 +50,7 @@ app.post('/api/signup', async (req, res) => {
 });
 
 // ----------------------------------------------------------------
-// 2. SIGN-IN ENDPOINT
+// 2. SIGN-IN ENDPOINT (Exposes exact WorkOS error for debugging)
 // ----------------------------------------------------------------
 app.post('/api/signin', async (req, res) => {
   const { email, password } = req.body;
@@ -71,10 +71,10 @@ app.post('/api/signin', async (req, res) => {
       accessToken,
     });
   } catch (error) {
-    console.error('Signin error:', error);
+    console.error('Signin error details:', error);
     return res.status(400).json({ 
       success: false, 
-      error: 'Invalid email or password.' 
+      error: error.message || 'Invalid email or password.' 
     });
   }
 });
@@ -84,7 +84,6 @@ app.post('/api/signin', async (req, res) => {
 // ----------------------------------------------------------------
 app.get('/api/music', async (req, res) => {
   try {
-    // List all files inside the 'Songs' bucket
     const { data: files, error } = await supabase
       .storage
       .from('Songs')
@@ -92,19 +91,17 @@ app.get('/api/music', async (req, res) => {
 
     if (error) throw error;
 
-    // Map each file to its title and public audio URL
     const tracks = files
-      .filter(file => file.name !== '.emptyFolderPlaceholder') // Exclude placeholder files
+      .filter(file => file.name !== '.emptyFolderPlaceholder')
       .map(file => {
         const { data: publicUrlData } = supabase
           .storage
           .from('Songs')
           .getPublicUrl(file.name);
 
-        // Format clean title from filename (e.g. "my-song.mp3" -> "my song")
         const cleanTitle = file.name
-          .replace(/\.[^/.]+$/, "") // Remove file extension
-          .replace(/[-_]/g, " ");   // Replace hyphens/underscores with spaces
+          .replace(/\.[^/.]+$/, "")
+          .replace(/[-_]/g, " ");
 
         return {
           title: cleanTitle,
