@@ -12,7 +12,7 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY);
 const clientId = process.env.WORKOS_CLIENT_ID;
 
 // ----------------------------------------------------------------
-// 1. SIGN-UP ENDPOINT: Creates user & sends real WorkOS email code
+// 1. SIGN-UP ENDPOINT: Creates user (WorkOS automatically sends code)
 // ----------------------------------------------------------------
 app.post('/api/signup', async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
@@ -26,10 +26,6 @@ app.post('/api/signup', async (req, res) => {
       emailVerified: false,
     });
 
-    await workos.userManagement.sendEmailVerification({
-      userId: user.id,
-    });
-
     return res.status(200).json({
       success: true,
       message: 'User created! Verification code sent to email.',
@@ -38,7 +34,7 @@ app.post('/api/signup', async (req, res) => {
   } catch (error) {
     console.error('Signup error:', error);
     
-    // Check if the error is because the email already exists
+    // Check if the email already exists
     if (error.message && error.message.toLowerCase().includes('already exists')) {
       return res.status(400).json({ 
         success: false, 
