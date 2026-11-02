@@ -1,12 +1,14 @@
 {
-  "name": "aknium-auth-backend",
+  "name": "aknium-auth",
   "version": "1.0.0",
   "type": "module",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "@workos-inc/node": "^4.0.3",
+    "@supabase/supabase-js": "^2.39.0",
+    "@workos-inc/node": "^4.0.0",
     "cors": "^2.8.5",
     "express": "^4.19.2"
   }
