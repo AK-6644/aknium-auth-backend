@@ -43,7 +43,7 @@
     /* Music Library Dashboard */
     .track-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
     .track-item { background: #0f172a; padding: 12px; border-radius: 6px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #334155; }
-    .track-title { font-weight: 600; font-size: 0.95rem; }
+    .track-title { font-weight: 600; font-size: 0.95rem; text-transform: capitalize; }
     audio { width: 100%; height: 35px; }
 
     .hidden { display: none; }
@@ -104,7 +104,7 @@
       <h2>Aknium Library 🎶</h2>
       <p class="subtitle" id="welcomeUser">Welcome back!</p>
       <div id="trackList" class="track-list">
-        <p style="text-align: center; color: var(--muted-text);">Loading tracks...</p>
+        <p style="text-align: center; color: var(--muted-text);">Loading tracks from storage...</p>
       </div>
     </div>
   </div>
@@ -166,16 +166,16 @@
             const trackDiv = document.createElement('div');
             trackDiv.className = 'track-item';
             trackDiv.innerHTML = `
-              <div class="track-title">${track.title || 'Untitled Track'}</div>
+              <div class="track-title">${track.title}</div>
               <audio controls src="${track.audio_url}"></audio>
             `;
             trackListEl.appendChild(trackDiv);
           });
         } else {
-          trackListEl.innerHTML = '<p style="text-align: center; color: var(--muted-text);">No music tracks found.</p>';
+          trackListEl.innerHTML = '<p style="text-align: center; color: var(--muted-text);">No audio files found in Songs bucket.</p>';
         }
       } catch (err) {
-        document.getElementById('trackList').innerHTML = '<p style="text-align: center; color: var(--error-color);">Failed to load tracks.</p>';
+        document.getElementById('trackList').innerHTML = '<p style="text-align: center; color: var(--error-color);">Failed to load audio tracks.</p>';
       }
     }
 
