@@ -6,7 +6,6 @@ import { createClient } from '@supabase/supabase-js';
 const app = express();
 app.use(express.json());
 app.use(cors());
-app.use(express.static('.'));
 
 // Initialize WorkOS and Supabase using Render environment variables
 const workos = new WorkOS(process.env.WORKOS_API_KEY);
@@ -50,7 +49,7 @@ app.post('/api/signup', async (req, res) => {
 });
 
 // ----------------------------------------------------------------
-// 2. SIGN-IN ENDPOINT (Exposes exact WorkOS error for debugging)
+// 2. SIGN-IN ENDPOINT
 // ----------------------------------------------------------------
 app.post('/api/signin', async (req, res) => {
   const { email, password } = req.body;
